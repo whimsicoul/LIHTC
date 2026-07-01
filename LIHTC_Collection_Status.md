@@ -1,123 +1,104 @@
 # LIHTC 2025 National Database — Collection Status
-*Last updated: June 30, 2026 (Texas developer entity pass: resolved 62 of 63 missing Texas developer entity names by pulling individual TDHCA Real Estate Analysis underwriting report PDFs per application number, including a deeper full-document pull for 6 cases where the page-1 summary alone was insufficient — see Section 2 Texas row for full detail. Prior update same day: added `source_count` and `award_status` (Final/Preliminary) columns to every record in the CSV, JSON, and Excel master files, and added a "Data Quality Summary" sheet to `LIHTC_Master_Database_2025.xlsx` rolling up source count, preliminary-record count, and missing-field count per state. Before adding these fields, fixed underlying `source_doc` data-integrity issues: 170 rows across 8 states (Alabama, Alaska, Arkansas, Delaware, Indiana, Iowa, Florida, West Virginia) carried a stale "[not in source_docs - web extraction]" annotation even though the referenced file is actually archived in `source_docs/` — annotation removed. Vermont's `source_doc` pointed to a `.pdf` that doesn't exist; corrected to the real `.csv` file. Wisconsin's `source_doc` pointed to a single nonexistent combined filename; corrected to the two real files (`wisconsin.9pct.awards.2025.pdf` and `wisconsin.4pct.awards.2025.pdf`). North Dakota's `source_doc` had a narrative note embedded alongside the real filename; the note was moved into `data_flags` where its content already partially lived. Verified after fixes: all 989 CSV/Excel rows' `source_doc` filenames now resolve to a real file in `source_docs/`.)*
+*Last updated: July 1, 2026*
 
-**Master database: 989 records across 43 states**
-**2 states sourced but not yet extracted (MA, PA) — see Section 3**
-**7 states with no data collected — see Section 3**
-**Note on JSON vs. CSV/Excel scope:** `lihtc_data/all_states.lihtc.2025.json` contains 1,002 records across 45 states/territories — 13 more than the 989-record master. The difference is intentional, not a sync bug: Kentucky (1 placeholder row — KHC's 2025 report could not be retrieved, no real data exists) and Rhode Island (12 rows — Rhode Island's SLIHTC is a *state* tax credit, not federal LIHTC) are excluded from the CSV/Excel master per CLAUDE.md's five-required-fields rule, but retained in the JSON for completeness/future use if either gap is resolved.
+**Master database: 1,112 records across 46 states**
+**JSON note:** `lihtc_data/all_states.lihtc.2025.json` has 1,125 records (48 states/territories) — 13 more than the CSV/Excel master. Kentucky (1 placeholder, no real data) and Rhode Island (12 rows, state tax credit not federal LIHTC) are excluded from the master per CLAUDE.md's five-field rule but kept in JSON.
 
-**New columns (added 2026-06-30):**
-- `source_count` — number of distinct source documents backing that row's figures (counted from `source_doc`, pipe-delimited where a row draws on multiple files). Lets you sort/filter the database by how well-documented each row is.
-- `award_status` — `"Final"` or `"Preliminary"`, derived from each row's explicit caveat language (e.g. "reservation only," "board preliminary award," "application-stage") and cross-checked against this file's per-state notes. 55 of 989 records (5.6%) are currently flagged Preliminary: all of Florida (27, board preliminary awards pending final confirmation), all of New Jersey (19, reservation stage), all of Delaware (4, preliminary allocation/requested amounts), Hawaii's Aikanaha and Hoonanea (2, reservation-only), and Oregon's 3 ORCA Impact Assessment rows (reservations, not yet final allocation). States whose source language uses "reservation" as their agency's standard final-award terminology (Ohio, New Hampshire, Wyoming) or whose row-level "not confirmed final" language was superseded by a later state-level final-rankings confirmation (Louisiana, North Dakota) are marked Final per this file's own prior verification notes — see those states' rows in Section 1 for the underlying reasoning.
+**Columns beyond the core five:**
+- `source_count` — number of distinct source docs backing a row
+- `award_status` — `Final` or `Preliminary`, based on source language (reservation/application-stage vs. confirmed award). 55 of 1,020 records (5.6%) are Preliminary.
 
 ---
 
 ## Section 1 — Complete
-
-All five required fields populated (State, Agency, Project Name, Developer, Award Amount). Caveats noted where data quality flags exist.
+All five required fields populated. Caveats noted where relevant.
 
 | State | Projects | Credit Types | Notes |
 |-------|----------|-------------|-------|
-| Alabama | 17 | 9% | AHFA award list PDF. Mix of new construction and rehab. TDC not in source. Source archived: `alabama.9pct.awards.2025.pdf` downloaded from ahfa.com (2026-06-26). |
-| Alaska | 5 | 9% + 4% | AHFC GOAL Program. Includes tribal and PSH projects. Agency name em-dash encoding fixed (2026-06-24). Source archived: `alaska.lihtc.awards.2025.pdf` (2025 LIHTC Reservation List) downloaded from ahfc.us (2026-06-26). |
-| Arkansas | 10 | 9% | ADFA 9% list PDF. All new construction. Multiple non-profit set-asides. Source archived: `arkansas.9pct.awards.2025.pdf` downloaded from adfa.arkansas.gov (2026-06-26). |
-| California | 249 | 9% + 4% | CTCAC. 53 9% projects (Rounds 1 & 2) + 196 4% projects (Rounds 1–3). All 249 developer names confirmed. Saggio Hills Phase II listed as two co-developers in source (Freebird Development Company / Jamboree Housing). "Ollie Apartments" appears twice — confirmed intentional: separate Round 1 and Round 2 allocations to the same project; both rows retained and flagged. |
-| Colorado | 12 | 9% | CHFA 2025 9% awards. All amounts $1,597,195–$1,600,000. All developer entities confirmed from source PDF. |
-| Connecticut | 10 | 9% | CHFA 2025 reservations. $14,841,228 total. All per-project amounts confirmed. |
-| Florida | 27 | 9% | FHFC 7 RFAs: 201 (Small/Med Counties, 9 projects), 202 (Large Counties, 10 projects), 203 (Miami-Dade, 3 projects), 212 (Revitalization, 1 project), 103 (Homeless, 1 project), 106 (Disabilities, 1 project), 108 (Homeless Med/Large, 2 projects). Awards are board preliminary awards. $81.2M total annual LIHTC. 4% (noncompetitive) not collected — see RFA 2025-205. Source archived: `florida.9pct.awards.2025.pdf` (October 24, 2025 FHFC Board Action document) downloaded from floridahousing.org (2026-06-26). |
-| Idaho | 7 | 9% | IHFA final allocations as of January 10, 2025. $6,389,837 total. Bluebird Village ($140K) is a supplemental credit award, not a standalone project. |
-| Indiana | 51 | 9% + 4% | IHCDA 2025A-C (16 projects), 2025A-G (1 project), 2025B-C (5 projects), 2025A-B bond (29 projects). Developer entities confirmed from awarded project PDFs. Source archived: `indiana.lihtc.awards.2025.pdf` (IHCDA 2025 Annual Report, covers all rounds) downloaded from in.gov/ihcda (2026-06-26). |
-| Iowa | 10 | 9% | IFA award listing PDF dated August 6, 2025. One supplemental award from 2024. Sources archived: `iowa.9pct.awards.2025.pdf` and `iowa.4pct.awards.2025.xlsx` downloaded from opportunityiowa.gov (2026-06-26). |
-| Kansas | 22 | 9% + 4% | 9% awards confirmed final (13 projects). **4% (8 projects, added 2026-06-30):** KHRC official "PAB Allocation List" (updated 11/13/2025) — confirms project name, developer legal entity (LLC), unit count, and award date for all 8 2025 4% LIHTC/PAB awards. **Caveat:** KHRC does not publish per-project dollar amounts for 4% awards in this or any found document — `award_amount_annual_lihtc` left blank and flagged for these 8 records only. Source archived: `kansas.4pct.pab_allocation_list.2025.pdf`. |
-| Louisiana | 21 | 9% | Louisiana Housing Corporation. **Confirmed final (2026-06-30):** cross-referenced against official "2025 LIHTC Final Rankings" (Exhibit A, as of 10/15/25) — all 21 project names, parishes, units, and LIHTC request amounts match exactly. Document explicitly titled "Final Rankings" though its own totals table still uses the term "RESERVATIONS" ($14,783,486 total) — LHC, like NJ and Louisiana's peer agencies, appears to use "reservation" as a terminal public-facing term even for finalized awards. Developer entity names retained as previously populated (legal-entity confidence not separately re-verified this pass — the Final Rankings document itself has no developer/sponsor column). Source archived: `louisiana.9pct.final_rankings.2025.pdf`. |
-| Maine | 5 | 9% | MaineHousing 5 projects with Notice to Proceed. $5,408,699 total. 2 state 4% bond projects confirmed but NOT federal LIHTC — excluded. |
-| Maryland | 13 | 9% | DHCD 2025 Competitive Funding Round (Notice 25-14, Oct 2025). $19,000,000 total (11 × $1.5M + 2 × $500K). Source document titled "2026 LIHTC Awards." 9 of 13 projects have co-developers; lead entity used. Locations are county-level only. |
-| Minnesota | 8 | 9% | Minnesota Housing 2025 Multifamily Consolidated RFP. $12,651,138 total. 12 additional projects funded via agency loans (no 9% HTC) excluded. |
-| Mississippi | 15 | 9% | MHC 2025 Housing Tax Credit Recipient List (Sept 10, 2025). All acquisition/rehabilitation. |
-| Montana | 6 | 9% | Montana Housing 2025 Housing Credit Awards. $3,720,204 total annual. Source shows 10-year totals; divided by 10. Eagle Seeker Housing excluded (Withdrawn). Two co-sponsored projects; lead sponsor used as developer. |
-| Nevada | 8 | 9% | NHD 2025 9% reservations. All 8 developer entities confirmed via web research (2026-06-24). Source: `nevada.9pct.reservations.2025.xlsx` (already in source_docs). `collection_method` field added. |
-| New Hampshire | 5 | 9% | NHHFA 2025 9% LIHTC Reservations. $5,000,000 total. Sponsor organization used as developer entity. **Verified (2026-06-30):** re-checked against current nhhfa.org reservations list — all 5 names/locations/units/amounts match exactly. NH Housing does not appear to publish a separate final-allocation list distinct from reservations; "Reservations" is the operative terminology. Sponsor names confirmed as published but not all verified as the specific LP/LLC tax-credit-owning entity (e.g. "PHA Housing Development" likely refers to Portsmouth Housing Authority's development arm). Source archived: `new_hampshire.9pct.reservations.2025.pdf`. |
-| New Jersey | 19 | 9% | NJHMFA spring reservations (4 projects, $6,333,560; reservation date 8/28/2025) + fall reservations (15 projects, $23,061,592; reservation date 2/25/2026). **Caveat:** Reservation stage only — not confirmed final allocations for either round. Both rounds treated as 2025 award year. **Investigated (2026-06-30):** NJHMFA's procedural mechanism requires a Binding Agreement or Carryover Allocation by Dec 31 of the reservation year to convert a reservation into an IRS-recognized allocation, but no public list naming which specific 2025 projects have completed this step was found — NJHMFA's "LIHTC Dashboard" is an embedded interactive tool (likely Power BI/Tableau) that cannot be parsed via automated web search. Treating reservation data as best-available public data, consistent with Ohio's resolution. |
-| New Mexico | 5 | 9% | NM MFA 2025 tab of historical awards workbook. $6,607,608 total annual. All amounts confirmed annual by source column label. All 5 developer entities confirmed. |
-| New York | 27 | 9% | HCR 9% RFP awards. All fields complete for 27 projects. **Note:** NYC HDC/HPD 4% data still not collected. |
-| Oregon | 10 | 9% + 4% | OHCS Oct 3 2025 HSC meeting awards. 7 confirmed 4% projects (HSC vote) + 3 ORCA Impact Assessment reservations (2 competitive 9%, 1 additional 4%). **Caveat:** 3 ORCA projects flagged as reservations not final allocations. Developer organizations confirmed (sponsors listed in meeting packet). Source: `oregon.lihtc.hsc.oct2025.packet.pdf`. Note: 333 Oak and Alyssa Daye Gardens use Oregon state programs (OAHTC/PSH Capital), not federal LIHTC — excluded. |
-| North Carolina | 50 | 9% + 4% | NCHFA 2025 awards. **49 of 50 developer entities confirmed (updated 2026-06-30):** Preserve at Forest Heights → Commonwealth Development Corporation (construction trade article); Walker Landing → Blue Ridge Atlantic Development (NCHFA awards list metadata). 1 still unresolved: The Reserve at Fairmont/James Harrell III — exhaustive search (NCHFA contact list, preliminary application list, general web) confirms no entity name is publicly available; treated as a confirmed dead-end pending direct agency contact. All amounts confirmed. |
-| North Dakota | 5 | 9% + 4% | NDHFA 2025 Applications Selected for Commitment. 5 projects received LIHTC ($9,893,236 total). KingsView Apartments and Wild Rose Senior Living deleted (HIF-only, no LIHTC awarded — reconfirmed 2026-06-30 against a separate Jan 5, 2026 ND Housing funding-commitment press release, which independently excludes both). **Credit type fix (2026-06-30):** Brookstone Apartments and Central at the Horizon were misflagged "9% Competitive" — the Jan 5, 2026 release explicitly states both are 4% ("$1.6 million (4%)" and "$4.3 million (4%)" respectively); corrected to 4% Non-Competitive. All 5 project names/amounts confirmed against this release. No separate "final allocation" document found beyond commitment-stage releases — ND Housing's periodic funding-commitment press releases are the de facto operative source. |
-| Ohio | 27 | 9% + 4% | OHFA 2025. 23 9% LIHTC Reservations ($35,495,770) + 4 4% Bond Gap Financing (BGF) awards ($7,006,126). All developer entities confirmed. TDC captured for all 23 9% projects. **Confirmed final (2026-06-30):** OHFA does not publish a separate "final allocation" list beyond the Reservation — checked May/June 2026 board announcements confirming financing milestones for 6 of our 23 projects (Opportunity Pointe I & II, Fountain Creek Senior Villas, Chesapeake Landing, Wesley Baymiller), all still referenced under their original 2025 reservation amounts. Reservation is OHFA's operative award terminology; no changed figures found. |
-| Oklahoma | 25 | 9% + 4% | OHFA 2025. Round 1 (8 projects) + Round 2 (12 projects) 9% awards + 4% awards (5 projects). $29,137,145 total. Developer names are LP/LLC legal entities as listed in source. |
-| South Carolina | 15 | 9% | SC Housing 2025 awards. **13 of 15 developer entities confirmed (updated 2026-06-30):** Swann Meadows → Swann Meadows SC LLC, confirmed via Novogradac market study PDF "Prepared for:" addressee line (downloaded directly via curl, 27MB, read with pdfplumber). 2 still unresolved: Chester Townhouses Phase II/George Baker (127-page Bowen National Research market study reviewed in full — no clear owner addressee line found; a USDA RD budget exhibit shows abbreviated "Borrower Name: NEW CHESTER TWNHSES PHASE II ALP" but this was not used as it isn't a verified full legal name) and Coit Village/James M. Bernstein (same contact as the resolved Swann Meadows record; re-attempted 2026-06-30 — checked SC Housing's market-studies landing page (no 2025 Florence County entries indexed yet) and tried 3 plausible direct URL patterns based on the 2025-{Project-Name}.pdf convention used by other 2025 studies, all 404; no market study located). All amounts confirmed. Source: `south_carolina.9pct.awards.2025.pdf` + `south_carolina.9pct.market_study.swann_meadows.2025.pdf`. |
-| South Dakota | 7 | 9% | SDHDA cumulative reservations list, 2025 section only. 7 competitive 9% projects confirmed. James Street Villas: 2025 credit amount only ($373,981); $121,792 forward commitment to 2026 noted in data_flags. **Note:** 2025 Tax Exempt Bond project (The Rhys Apartments, 4%) not extracted — add if federal LIHTC confirmed. |
-| Tennessee | 18 | 9% | 18 funded projects from THDA 2025 preliminary ranking (July 30, 2025). Awards confirmed final per THDA press release (Sep 8, 2025). Developer organizations confirmed from email domains in preliminary ranking PDF. Source: `tennessee.9pct.preliminary_rankings.2025.pdf`. No final listing published by THDA as of Jun 2026. Note: organization names (not LP/LLC legal entities) — individual LP names not available in public THDA documents. |
-| Utah | 8 | 9% | Utah Housing Corporation. June 2024 application round, awarded September 5, 2024 for 2025 credit year. $10,588,180 total. |
-| Vermont | 8 | 9% + 4% | VHFA 2025 allocations. 5 Tax Exempt Bond (4%) + 3 Federal Competitive (9%). Source archived: `vermont.lihtc.allocations.2025.csv` downloaded from vhfa.org allocations page (2026-06-26). |
-| Virginia | 25 | 9% | Virginia Housing Final Rankings (July 10, 2025). All pool types. Owner Entity used as developer. |
-| Washington | 11 | 9% | WSHFC 2025 Allocation List. Three pools: King County (2), Metro (4), Non-Metro New Production (5). Non-Metro pool oversubscribed — may include forward commitment of 2026 credits, flagged per project. |
-| West Virginia | 11 | 9% + 4% | WVHDF Credit Allocation Recipients list. Two projects (White Oak Landing/Manor) have unusually low credit amounts ($31K) — likely carryover. Source archived: `west_virginia.lihtc.recipients.2025.pdf` downloaded from wvhdf.com (2026-06-26). |
-| Wisconsin | 27 | 9% + 4% | WHEDA award and reservation lists. Only federal credit recorded. $36.6M total. Sources archived: `wisconsin.9pct.awards.2025.pdf` and `wisconsin.4pct.awards.2025.pdf` (WHEDA 2025 HTC applicant lists; award data confirmed from WHEDA award announcement pages) downloaded from wheda.com (2026-06-26). |
-| Wyoming | 4 | 9% | **Corrected (2026-06-30):** WCDA's official "Awards by Year" list (wyomingcda.com, updated 5/18/2026) is the authoritative complete record of all WCDA LIHTC awards by year, replacing the prior "Applications Received" list. Cross-referencing revealed only 4 of the 16 previously-listed records actually received a 2025 award: McKinney Crossing, Pioneer Village III, Cathy Gardens, and Powell Meadowlark (renamed to official title "Meadowlark Place"). The other 12 (Apex South Beverly, Summit at Prosser Townhomes, Evanston Chief Washakie, Parkside Apartments, North 4th Redevelopment ×2, Fox Park Ridge, Shoshone Ridge, Preserve at Stagecoach, Residence at Rock Springs, Teal Springs, Pershing Pointe) were application-stage only and did not appear on the official award list — **removed from the database**. All 4 retained records have confirmed legal-entity developer names (e.g. "Housing Solutions, LLC", "Ide Development, LLC") and corrected amounts. Source archived: `wyoming.lihtc.awards_by_year.2025.pdf`. |
+| Alabama | 17 | 9% | AHFA award list. |
+| Alaska | 5 | 9% + 4% | AHFC GOAL Program; includes tribal/PSH projects. |
+| Arkansas | 10 | 9% | ADFA award list. |
+| California | 249 | 9% + 4% | CTCAC, Rounds 1–3. "Ollie Apartments" appears twice intentionally (separate Round 1/2 allocations). |
+| Colorado | 12 | 9% | CHFA 2025 awards. |
+| Connecticut | 10 | 9% | CHFA 2025 reservations, $14.8M total. |
+| Florida | 27 | 9% | FHFC board "tentative selection" awards across 7 RFAs, $81.2M total. 4% not collected. |
+| Idaho | 7 | 9% | IHFA final allocations, $6.4M total. |
+| Indiana | 78 | 9% + 4% | IHCDA/READI 2.0 awards across multiple 2025/2026-labeled rounds. Sourced via web research (agency doesn't publish a single consolidated list); `source_doc` flagged accordingly. |
+| Iowa | 14 | 9% + 4% | IFA award lists (Aug 2025 9%, June 2026 4%). |
+| Kansas | 22 | 9% + 4% | 9% confirmed final. 4% (8 projects): no per-project dollar amounts published by KHRC — flagged. |
+| Louisiana | 21 | 9% | LHC Final Rankings (Oct 2025), $14.8M total. |
+| Maine | 5 | 9% | MaineHousing, $5.4M total. |
+| Maryland | 13 | 9% | DHCD 2025 round, $19M total. |
+| Minnesota | 8 | 9% | Minnesota Housing Consolidated RFP, $12.7M total. |
+| Mississippi | 15 | 9% | MHC 2025 recipient list. |
+| Missouri | 45 | 9% + 4% | MHDC 2025 board-approved awards (31 in the 9% list, some rows drawing 4% credit; 14 more from a separate 4% approvals list), $50.8M total. |
+| Montana | 6 | 9% | Montana Housing, $3.7M annual total. |
+| Nebraska | 12 | 9% | NIFA 2025 Reservations list (12/17/2025), $6.7M total. Reservation stage — no separate final-allocation document found; flagged Preliminary. |
+| Nevada | 8 | 9% | NHD 2025 reservations. |
+| New Hampshire | 5 | 9% | NHHFA reservations (agency's operative award terminology), $5M total. |
+| New Jersey | 19 | 9% | Spring + fall reservations, $29.4M total. Reservation stage only — no public data on which have converted to final allocations. |
+| New Mexico | 5 | 9% | NM MFA 2025 awards, $6.6M total. |
+| New York | 27 | 9% | HCR 9% RFP awards. NYC HDC/HPD 4% not collected. |
+| Oregon | 10 | 9% + 4% | OHCS Oct 2025 awards; 3 projects are reservations pending final allocation. |
+| North Carolina | 50 | 9% + 4% | NCHFA 2025 awards. 1 developer entity unresolved (The Reserve at Fairmont). |
+| North Dakota | 5 | 9% + 4% | NDHFA 2025 commitments, $9.9M total. |
+| Ohio | 27 | 9% + 4% | OHFA reservations + Bond Gap Financing awards, $42.5M total. |
+| Oklahoma | 25 | 9% + 4% | OHFA 2025, $29.1M total. |
+| South Carolina | 15 | 9% | SC Housing 2025 awards. 2 developer entities unresolved (Chester Townhouses II, Coit Village). |
+| South Dakota | 7 | 9% | SDHDA 2025 reservations. |
+| Tennessee | 18 | 9% | THDA preliminary ranking, confirmed final via press release. Developer names are orgs, not legal entities. |
+| Utah | 8 | 9% | Utah Housing Corp, $10.6M total. |
+| Vermont | 8 | 9% + 4% | VHFA 2025 allocations. |
+| Virginia | 25 | 9% | Virginia Housing Final Rankings (July 2025). |
+| Washington | 11 | 9% | WSHFC 2025 allocations; Non-Metro pool may include 2026 forward-committed credits. |
+| West Virginia | 11 | 9% + 4% | WVHDF recipients list. |
+| Wisconsin | 27 | 9% + 4% | WHEDA award/reservation lists, $36.6M total. |
+| Wyoming | 4 | 9% | WCDA official awards-by-year list. |
 
-**Total: 37 states, 803 projects (Section 1)**
+**Total: 39 states, 891 projects**
 
 ---
 
 ## Section 2 — Partially Complete
+In the database but missing one or more required fields, or unconfirmed-stage data.
 
-In the database but missing one or more required fields, or data from an unconfirmed stage (applications, reservations, QAP rankings).
+| State | Projects | What's Missing | Next Step |
+|-------|----------|---------------|-----------|
+| Arizona | 33 | 2 developer entities missing (Glendale Apartments, Eloy Goy Housing). | Call ADOH Rental Development (602) 771-1000. |
+| Delaware | 4 | 1 missing credit amount (Mispillion Station III); 3 records preliminary. **Re-checked (2026-07-01):** no finalized award chart or board minutes with per-project figures found beyond what was already known — dead end via web search. | Obtain DSHA allocation letter. |
+| Georgia | 59 | 25 of 59 (the 4% projects) missing annual LIHTC credit amount — DCA only publishes bond amount, confirmed non-disclosure not an extraction gap. | Obtain DCA 4% allocation letters if needed. |
+| Hawaii | 4 | 2 projects (Aikanaha, Hoonanea Phase I) are reservations, not final allocations. | Obtain final HHFDC allocation letters. |
+| Illinois | 23 | 1 missing credit amount (LATHROP IC, 4%) — not published at per-project level. | Contact IHDA. |
+| Michigan | 35 | MSHDA's Jan 29, 2025 press release states 15 projects/$17.3M total but only itemizes 12 by name/amount; the other 3 projects (~$2M) aren't extractable without guessing. All 35 records are confirmed final 9% awards across 3 rounds (Jan, Jul, Dec 2025). | Check if MSHDA published a fuller list/PDF for the Jan 29 round covering the 3 missing projects. |
+| Texas | 63 | 1 developer name missing (Pathways at Santa Rita Courts West — assigned to an individual, no company in source). | Contact TDHCA/HACA directly. |
 
-| State | Projects | What's Missing | Status |
-|-------|----------|---------------|--------|
-| Arizona | 33 | 2 of 33 developer entities still missing (Glendale Apartments, Eloy Goy Housing). **Web search exhausted (2026-06-30):** neither project appears in the AZBEX "15 Affordable Developments" article (different award batch); ADOH's own `FY2025-LIHTC-Projects-Report.pdf` returns HTTP 403 for both WebFetch and direct curl download. All amounts confirmed. | Call ADOH Rental Development at (602) 771-1000 for both missing entities. |
-| Delaware | 4 | 1 of 4 missing credit amount: Mispillion Station III Apartments (4%) — amount not specified in source. 3 other records are preliminary (may be revised). Source archived: `delaware.9pct.awards.2025.pdf` (DSHA 2025 Preliminary Award Chart) downloaded from destatehousing.com (2026-06-26). | Obtain DSHA allocation letter for Mispillion Station III. |
-| Georgia | 59 | **Developer entities resolved** for 59 of 59 remaining projects via web research (email domains + targeted searches). 34 9% projects: developer orgs confirmed, amounts confirmed from DCA award announcement. 25 4% projects: developer orgs confirmed, but annual LIHTC credit NOT published by DCA — bond amounts only in 4% source. **Re-confirmed (2026-06-30):** downloaded DCA's official "2025 4% Housing Credit/Bonds Award List" (Select tab) — all 25 projects confirmed officially Selected by exact name match; document still only publishes Bond Amount, never the annual federal LIHTC credit figure, confirming the gap is a genuine DCA non-disclosure rather than a missed source. Also checked the official "2025 9% Housing Credit Award List" specifically for Perry Commons and Pattillo Residences (previously flagged as missing amounts in the open-issues list) — both show status "Withdrawn" with no credits allocated; neither exists in the current database, confirming they were correctly excluded already. Sources: `georgia.9pct.awards.2025.xlsx` and `georgia.4pct.award_list.2025.xlsx`. | Obtain DCA 4% allocation letters for 25 4% annual LIHTC credit amounts. |
-| Hawaii | 4 | 2 of 4 projects (Aikanaha Residences, Hoonanea Phase I) are LIHTC reservations only — not final allocations. All 5 fields populated for all 4 projects. | Obtain final HHFDC allocation letters (IRS Form 8609 issuance) for Aikanaha and Hoonanea. |
-| Illinois | 23 | 1 of 23 missing credit amount: LATHROP IC (4%, 309 units, Related Midwest, Chicago) — annual allocation not listed in source. **Web search exhausted (2026-06-30):** Related Midwest, Chicago YIMBY, The Real Deal, and Block Club Chicago coverage found total project cost (~$202.5M) and total LIHTC equity (~$37M) but no per-project annual federal credit figure; IHDA does not appear to publish this at the per-project level for bond-financed 4% deals. All other 22 records complete. A second 9%-only PDF (`Illinois-2025-LIHTC-Approved-Allocations-1.pdf`) was received during cleanup — confirmed exact duplicate of already-extracted data; filed as `illinois.9pct.awards.2025.v2.pdf`. | Check IHDA allocation announcement for LATHROP IC annual credit amount. |
-| Texas | 63 | 1 of 63 developer fields still missing. Awards confirmed FINAL (TDHCA Oct 14, 2025 Award and Waiting List). **Developer entities resolved for 62 of 63 (2026-06-30):** pulled individual TDHCA Real Estate Analysis underwriting report PDFs per application number (via Legistar / tdhca.state.tx.us/readocs). 57 resolved from the page-1 "KEY PRINCIPALS / SPONSOR" box (21 of these have the Owner/Developer role inferred from naming convention/context rather than an explicit printed label — flagged "needs verification" in `data_flags`). **5 more resolved via deeper full-document pull (2026-06-30):** for Hartwood at Windstone, Abbington Station, Heritage Estates at Medina, and McKinney Ranch Senior Living, page 1 only listed unlabeled Owner/Sponsor entities, but the full report's Developer Fee / Sources & Uses table elsewhere in the document explicitly named a distinct developer-fee-recipient entity (e.g., "Windstone Developers, LLC," "Rea Ventures Group LLC," "GHT Development II, LLC and Urbanize Inc.," "Palladium McKinney Ranch Development, LLC") — confirmed as the true developer. For Conway Village, the document explicitly states the nonprofit co-GP "will participate in the development and construction activities," confirming it as developer. Remaining 1 (Pathways at Santa Rita Courts West) has Developer role assigned to a named individual (Suzanne Schwertner) with no company affiliation printed anywhere in the 15-page report — genuinely no entity name exists in this source. | Contact TDHCA/HACA directly for Pathways at Santa Rita Courts West's developer entity (this is a HACA/Austin public housing redevelopment). Recommend spot-checking the 21 "needs verification" entries against full underwriting report text if used for official purposes. |
-**Total: 6 states, 186 projects with partial data**
+**Total: 7 states, 221 projects**
 
 ---
 
 ## Section 3 — No Usable Data
+Nothing extracted, or only a placeholder row.
 
-Nothing extracted, or only a placeholder row. Includes states where source documents are in hand but blockers prevent extraction.
+| State | Agency | Notes | Next Step |
+|-------|--------|-------|-----------|
+| District of Columbia | DHCD | No public award list; press-release only. | FOIA/public records request. |
+| Kentucky | KHC | Website migration broke the 2025 report link; no replacement found. | Call KHC Multifamily (800) 633-8896 or multifamily@kyhousing.org. |
+| Massachusetts | EOHLC | Source docs in hand; per-project amounts and credit type absent. Mass.gov blocks automated fetches. | Direct EOHLC contact or manual download. |
+| Pennsylvania | PHFA | Source docs in hand; image-based PDFs, no entity data for 39 of ~41 projects. | Direct PHFA contact needed. |
+| Rhode Island | RIH | Only state tax credit (SLIHTC) data found, no federal LIHTC. | Confirm if RIH administers federal LIHTC separately. |
 
-| State | Agency | Projects (est.) | Notes | Next Step |
-|-------|--------|----------------|-------|-----------|
-| District of Columbia | DHCD | — | No confirmed public award list. DHCD announces via press release only. | FOIA/public records request. |
-| Kentucky | Kentucky Housing Corporation (KHC) | ~13-15 (est.) | **BLOCKED — not completable via web search.** KHC migrated its website; the `2025 Multifamily Funded Report.pdf` (old URL pattern `Partners/Developers/Multifamily/Documents/`) is 404 and was not carried over to the new `sites/default/files/` structure. No replacement was posted — press releases page only shows pre-2024 items, and the `wapps.kyhousing.org` award-history reporting tool returns a server configuration error. NCSHA's "$12.5M+ awarded" article (2025) and a Lane Report writeup are both blocked (403). Google's index of the dead PDF surfaced 4 project names via snippets, not independently verified against a primary source: Crescent Hill Manor Apartments (Taylor Co., 60 units, ~$707K, developer Positive Housing LLC), Malabu Manor Apartments (Fayette Co., 80 units, ~$925K, developer Fairstead Affordable LLC), Opportunity Village (Jefferson Co., 76 units, ~$1.48M, developer Woda Cooper Development Inc.), Journey Flats (Jefferson Co., 69 units, ~$1.35M, developer LDG Multifamily LLC). **Not added to the database** — snippet-derived data without seeing the source table risks transcription errors and an incomplete project list. Every web-search avenue has been exhausted (direct URL guessing, site search, news archives, agency press page); requires a human to contact the agency directly. | **Requires manual follow-up — not actionable via further searching.** Call KHC Multifamily at (800) 633-8896 or email multifamily@kyhousing.org for the 2025 funded report; or retry `wapps.kyhousing.org` reporting tool later in case the configuration error is transient. |
-| Massachusetts | EOHLC | ~21 | Source documents in hand. Per-project LIHTC amounts absent; credit type (4% vs. 9%) not specified per project. Mass.gov blocks all automated fetches. Additional file `massachusetts.lihtc.congressional_districts.historical.pdf` is a historical all-time list (849 projects, no amounts, no years) — does NOT resolve the blocker. | Direct EOHLC contact or manual download needed before extraction. |
-| Michigan | MSHDA | — | Two wrong-year PDFs received: 2019 round and 2026 round. Neither is 2025 data. | Check michigan.gov/mshda/developers/lihtc for 2025 awards. |
-| Missouri | MHDC | — | `source_docs/missouri.4pct.applications_received.2025.pdf` in hand — application-stage only. Do NOT extract until confirmed final allocations obtained. | Obtain MHDC final award list. |
-| Nebraska | NIFA | — | Two application lists in hand — neither is confirmed awards. | Obtain NIFA final award list from nifa.org. |
-| Pennsylvania | PHFA | ~41 | Source documents in hand. 39 of 41 developer entity names absent — PHFA public PDFs are image-based with no entity data. | Direct PHFA contact needed for entity names before extraction. |
-| Rhode Island | RIH | — | All 13 originally collected rows were SLIHTC (state tax credit only, no federal LIHTC amounts) — all deleted (2026-06-24). 12 SLIHTC records remain in JSON only (not in CSV/Excel master). No downloadable PDF available — data sourced from Governor's press release (governor.ri.gov) and rihousing.com announcement pages. No confirmed federal LIHTC data for 2025. | Confirm whether RIH administers federal LIHTC separately; if so, obtain federal allocation list. |
-
-**Total: 8 states, ~62 sourced but not extracted; remainder not started**
+**Total: 5 states, ~62 projects sourced but not extracted (or not applicable); remainder not started**
 
 ---
 
 ## Summary
 
-| Section | States | Projects (est.) |
-|---------|--------|----------------|
-| ✅ Complete | 37 | 803 |
-| ⚠️ Partial | 6 | 186 |
-| ❌ No usable data | 8 | — |
-| **Total in database** | **43** | **989 records** |
-| **Total in scope** | **~51** | **~1,112 (est. when full)** |
+| Section | States | Projects |
+|---------|--------|----------|
+| ✅ Complete | 39 | 891 |
+| ⚠️ Partial | 7 | 221 |
+| ❌ No usable data | 5 | — |
+| **Total in database** | **46** | **1,112 records** |
+| **Total in scope** | **~51** | **~1,235 (est. when full)** |
 
-**Data quality at a glance (new 2026-06-30):** 989/989 records have a resolvable `source_doc` (0 unresolved filenames). 55 records (5.6%) are flagged `award_status: Preliminary`. Per-state source counts and missing-field counts are in the "Data Quality Summary" sheet of `LIHTC_Master_Database_2025.xlsx`.
-
-**Remaining open issues (pre-delivery):**
-- Arizona: 2 records still missing developer names (Glendale Apartments, Eloy Goy Housing) — web search exhausted (2026-06-30; ADOH FY2025 report PDF returns 403); call ADOH (602) 771-1000
-- North Carolina: 1 record still missing developer entity (The Reserve at Fairmont/James Harrell III) — web search exhausted (2026-06-30); requires direct NCHFA contact
-- South Carolina: 2 records still missing developer entity (Chester Townhouses Phase II/George Baker, Coit Village/James M. Bernstein) — full market-study PDF review did not surface a confirmed legal entity name; requires direct SC Housing contact
-- Delaware: 1 record missing credit amount (Mispillion Station III Apartments) — re-checked (2026-06-30) the Oct 17, 2025 Governor/DSHA Milford announcement and a delawarelive.com follow-up; both confirm only the $3.18M four-project total, no per-project Mispillion figure, and explicitly still call all four awards "preliminary." Obtain DSHA allocation letter.
-- Georgia: 25 4% records missing annual LIHTC credit amounts — re-confirmed (2026-06-30) via DCA's official 4% Award List that bond amount is the only figure ever published; obtain DCA allocation letters for actual federal LIHTC credit per project
-- Illinois: 1 record missing credit amount (LATHROP IC, 4%) — web search exhausted (2026-06-30); contact IHDA for annual allocation figure
-- Kansas: 8 4% records missing credit amount — re-checked (2026-06-30) both round-one and round-two KHRC press releases; each one explicitly redirects to the same PAB Allocation List (no dollar breakdown) rather than disclosing per-project figures inline, confirming the gap is consistent across every KHRC public document, not a missed source. Contact KHRC (housingdevelopment@kshousingcorp.org).
-- Hawaii: 2 records (Aikanaha Residences, Hoonanea Phase I) still reservation-only — re-checked again (2026-06-30) against HHFDC's Jan 8, 2026 Finance Branch status report; both still listed as pending HMMF bond issuance, no LIHTC final-allocation progress found
-- Kentucky: No data collected — KHC's 2025 funded report PDF is dead post-migration with no replacement found via web search; call KHC Multifamily (800) 633-8896 or email multifamily@kyhousing.org
-- Texas: 1 of 63 developer names still missing (Pathways at Santa Rita Courts West) — pulled all 63 TDHCA underwriting report PDFs, including full multi-page text (not just page 1) for the 6 initially-unresolved cases (2026-06-30); 5 of those 6 were resolved by finding the developer entity named in the Developer Fee/Sources & Uses table elsewhere in the document. The 1 true remainder has the Developer role assigned to a named individual with no company name printed anywhere in the report. Also: 21 of the 62 resolved entries have Owner/Developer role inferred from context rather than an explicit label — recommend spot-check if used for official purposes. Contact TDHCA/HACA directly for the 1 remaining entity.
-- Florida: Awards still "Board preliminary award" as of Jan 30, 2026 per existing source note; a deeper pass through FHFC board action packages (large, image/binary-heavy PDFs) is needed to find final confirmation — not resolved this session, scoped as a dedicated follow-up
-- New Jersey: Reservation stage only; NJHMFA's carryover-confirmation data lives in an interactive dashboard (Power BI/Tableau) not accessible via web search — best-available data retained
-- Rhode Island: No federal LIHTC data — confirm if RIH administers federal credits separately
+**2026-07-01 web-research pass:** Targeted follow-up search on the 4 states/gaps most likely to have a findable update (Michigan, Missouri, Nebraska, Delaware). Michigan went from zero data to 35 confirmed final 9% awards (3 MSHDA press releases). Missouri went from application-stage-only to 45 confirmed board-approved awards (2 MHDC PDFs). Nebraska went from application-stage-only to 12 confirmed reservations (NIFA list, flagged Preliminary — not yet final allocation). Delaware's Mispillion Station III amount remains unresolved; no newer source found, confirmed dead end for now.
